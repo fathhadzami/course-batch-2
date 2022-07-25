@@ -5,6 +5,7 @@ import (
 	"course/internal/exercise"
 	"course/internal/middleware"
 	"course/internal/user"
+	"course/internal/user/repository"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -20,11 +21,11 @@ func main() {
 
 	db := database.NewConnDatabase()
 	exerciseService := exercise.NewExerciseUsecase(db)
-	userUsecase := user.NewUserUsecase(db)
-	r.POST("/register", userUsecase.Register)
-	r.POST("/login", userUsecase.Login)
+	// repo := repository.NewDatabaseRepo(db)
+	mcsrv := repository.NewMcsrvRepo()
+	userUsecase := user.NewUserUsecase(mcsrv)
 
-	r.GET("/exercises/:id", middleware.WithJWT(userUsecase), exerciseService.GetExerciseByID)
+	r.GET("/exercises/:id", middleware.WithTimeout(), middleware.WithJWT(userUsecase), exerciseService.GetExerciseByID)
 	r.GET("/exercises/:id/score", middleware.WithJWT(userUsecase), exerciseService.CalculateUserScore)
 
 	r.Run(":1234")

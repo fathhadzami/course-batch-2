@@ -77,6 +77,7 @@ func (exUsecase ExerciseUsecase) CalculateUserScore(c *gin.Context) {
 	}
 
 	var score int
+
 	for _, answer := range answers {
 		if strings.EqualFold(answer.Answer, mapQuestion[answer.QuestionID].CorrectAnswer) {
 			score += mapQuestion[answer.QuestionID].Score

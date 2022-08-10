@@ -24,6 +24,7 @@ func WithJWT(us *user.UserUsecase) gin.HandlerFunc {
 				"message": "unauthorize",
 			})
 			c.Abort()
+			return
 		}
 
 		auths := strings.Split(authHeader, " ")
@@ -35,7 +36,23 @@ func WithJWT(us *user.UserUsecase) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		ctxUserID := context.WithValue(c.Request.Context(), "user_id", data["user_id"])
+
+		userIDInf, ok := data["user_id"]
+		if !ok {
+			c.JSON(401, gin.H{
+				"message": "invalid data",
+			})
+			c.Abort()
+			return
+		}
+		userID := int(userIDInf.(float64))
+		if !us.IsUserExist(c.Request.Context(), userID) {
+			c.JSON(401, gin.H{
+				"message": "user not exists",
+			})
+			c.Abort()
+		}
+		ctxUserID := context.WithValue(c.Request.Context(), "user_id", userID)
 		c.Request = c.Request.WithContext(ctxUserID)
 		c.Next()
 	}
